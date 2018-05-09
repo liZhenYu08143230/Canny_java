@@ -1,4 +1,4 @@
-package Gaussian;
+package ImageCanny;
 
 import static java.lang.Math.*;
 
@@ -12,7 +12,7 @@ public class Gaussian {
     private int k, kSquare2;
     private int filter[][], intSum =0;
 
-    public int getIntSum(){
+    private int getIntSum(){
         return intSum;
     }
     public Gaussian(double sigam, int guiYimode, int dimension){
@@ -28,6 +28,7 @@ public class Gaussian {
         }
         kSquare2 =2*k*k;
     }
+
     //获取最佳的滤波器大小
     private int getSizeFilter(){
         int temp= (int) (6*sigam);
@@ -40,9 +41,9 @@ public class Gaussian {
             return temp+1;
         }
     }
+
     //滤波器生成
     public void generateGaussianTemplate(){
-        System.out.println(sizeFilter);
         double temp[][]=new double[filter.length][filter[0].length];
         double sigamaSquare2=2*sigam*sigam;
         for(int i = 0; i< filter.length; i++){
