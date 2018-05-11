@@ -10,6 +10,8 @@ public class Grad {
     private static int sobelX[][]={{-1,0,1},{-2,0,2},{-1,0,1}};
     private static int sobelY[][]={{-1,-2,-1},{0,0,0},{1,2,1}};
     private static double theta[][];
+    private static int gx[][];
+    private static int gy[][];
 
     /**
      * 使用Sobel算子产生梯度图像所需的Gx，Gy图像
@@ -28,8 +30,8 @@ public class Grad {
         sobel[0]=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
         sobel[1]=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
 
-        int gx[][]=new int [width][height];
-        int gy[][]=new int [width][height];
+        gx=new int [width][height];
+        gy=new int [width][height];
         theta=new double[width][height];
 
         ImageBaseOp.Convolution(srcImage,gx,sobelX,modulusOfNormalization);
@@ -38,13 +40,7 @@ public class Grad {
         ImageBaseOp.changePicture(sobel[0],gx);
         ImageBaseOp.changePicture(sobel[1],gy);
 
-        ImageBaseOp.QueZhiChuLi(sobel[0],33);
-        ImageBaseOp.QueZhiChuLi(sobel[1],33);
-
-
         gradPicture(gx,gy,outImage);
-        ImageBaseOp.QueZhiChuLi(outImage,0);
-
 
         angleArrary(gx,gy);
 
@@ -71,11 +67,11 @@ public class Grad {
         for(int x=0;x<width;x++){
             for(int y=0;y<height;y++){
 //                M(x,y)=sqrt(Gx^2+Gy^2)
-                rgb[0]=(int) sqrt(pow(gx[x][y],2)+pow(gy[x][y],2));
+  //              rgb[0]=(int) sqrt(pow(gx[x][y],2)+pow(gy[x][y],2));
 //                M(x,y)=|Gx|+|Gy|
-//                rgb[0]=abs(gx[x][y])+abs(gy[x][y]);
+                rgb[0]=abs(gx[x][y])+abs(gy[x][y]);
                 rgb[1]=rgb[2]=rgb[0];
-                ImageBaseOp.setRGB(outImage,x,y,0xffffffff,rgb);
+                ImageBaseOp.setRGB(outImage,x,y, rgb, 0xffffffff);
             }
         }
     }
@@ -92,10 +88,14 @@ public class Grad {
         for(int x=0;x<width;x++){
             for(int y=0;y<height;y++){
                 temp = (atan2(gy[x][y],gx[x][y])*(180/Math.PI));
-                //temp = temp>=0?temp:temp+360;
-                //temp = temp>=180?temp-180:temp;
+                temp = temp>=0?temp:temp+360;
                 theta[x][y]=temp;
             }
         }
+    }
+
+    public static int[][][] getGxGy(){
+        int [][][] result={gx,gy};
+        return  result;
     }
 }

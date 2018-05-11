@@ -35,11 +35,13 @@ public class Canny {
         long endTimeGray=System.currentTimeMillis();
         System.out.println("Running Time Gray="+(endTimeGray-startTimeGray)+"ms");
 
+
         Gaussian gaussian=new Gaussian(sigam,guiYiMode,dimension,grayImage,gsImage1D,imageSaveDir );
 
         //高斯模糊 1D
         long startTime1D=System.currentTimeMillis();
         gaussian.gaussianPicture();
+        ImageBaseOp.thresholdProcessing(gsImage1D,15);
         long endTime1D=System.currentTimeMillis();
         System.out.println("Running Time Gaussian 1d="+(endTime1D-startTime1D)+"ms");
 
@@ -51,7 +53,7 @@ public class Canny {
 
         //非最大抑制
         long startTimeNMS=System.currentTimeMillis();
-        NMSImage= NMS.NMSwithoutPowerWeight(gradBYsoble,theta,imageSaveDir);
+        NMSImage= NMS.NMSwithPowerWeight(gradBYsoble,theta,Grad.getGxGy(),imageSaveDir);
         long endTimeNMS=System.currentTimeMillis();
         System.out.println("Running Time NMS="+(endTimeNMS-startTimeNMS)+"ms");
 

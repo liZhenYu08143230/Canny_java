@@ -18,11 +18,11 @@ public class Gray {
         try {
             for(int y = srcImage.getMinY(); y < height; y++) {
                 for(int x = srcImage.getMinX(); x < width ; x ++) {
-                    rgb= ImageBaseOp.getRGBInArrary(srcImage,x,y);
+                    rgb= ImageBaseOp.getRgbArrary(srcImage,x,y);
                     //加权法的核心,加权法是用图片的亮度作为灰度值的
                     int grayValue = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114 + 500) / 1000;
                     rgb[0]=rgb[1]=rgb[2]=grayValue;
-                    ImageBaseOp.setRGB(outImage,x,y,srcImage.getRGB(x, y),rgb);
+                    ImageBaseOp.setRGB(outImage,x,y, rgb, srcImage.getRGB(x, y));
                 }
             }
             ImageBaseOp.SaveImage(outImage,"jpg",new File(imageSaveDir+"gray.jpg"));

@@ -16,7 +16,7 @@ public class ImageBaseOp {
      * @param image 需要获取的图片
      * @return 返回的RGB数组[0]-r,[1]-g,[2]-b
      */
-    public static int[] getRGBInArrary( BufferedImage image,int x, int y) {
+    public static int[] getRgbArrary(BufferedImage image, int x, int y) {
         int rgb[]=new int[3];
         int pixel = image.getRGB(x, y);
         rgb[0]=(pixel & 0xff0000 ) >> 16;
@@ -26,14 +26,14 @@ public class ImageBaseOp {
     }
 
     /**
-     * 设置srcImage的像素
+     * 设置srcImage的像素，RGB的数据分别保存
      * @param Image 需要设置RGB值的对象
      * @param x 图片修改位置的x坐标
      * @param y 图片修改位置的y上坐标
-     * @param  srcPixel 原像素值
      * @param  rgb 修改的rgb数组
+     * @param  srcPixel 原像素值
      */
-    public static void setRGB(BufferedImage Image, int x, int y, int srcPixel, int rgb[]){
+    public static void setRGB(BufferedImage Image, int x, int y, int[] rgb, int srcPixel){
         int pixel;
         for(int i=0;i<3;i++){
             if(rgb[i]>255){
@@ -61,6 +61,13 @@ public class ImageBaseOp {
         changePicture(outImage,RGBArrary);
     }
 
+    /**
+     * 对图像进行二维卷积，每个像素对应的结果保存在outArrary中。
+     * @param srcImage 原图像
+     * @param outArrary 卷积产生的结果，二维数组。是图像三通道里的其中之一
+     * @param Convolution 二维卷积核 int[][]
+     * @param modulusOfNormalization 卷积核的归一化系数
+     */
     public static void  Convolution(BufferedImage srcImage, int outArrary[][], int Convolution[][], int modulusOfNormalization){
         int xStart=srcImage.getMinX();
         int yStart=srcImage.getMinY();
@@ -123,7 +130,7 @@ public class ImageBaseOp {
                         }else if(xy1>=secondEnd){
                             xy1=secondEnd-1;
                         }
-                        srcRGB =getRGBInArrary(srcImg_time,time==0?x:xy1,time==1?y:xy1);
+                        srcRGB = getRgbArrary(srcImg_time,time==0?x:xy1,time==1?y:xy1);
                         //-----------------------------------
                         outRGB+=(Convolution[center+i]*srcRGB[0]);
                         //------------------------------------
@@ -136,12 +143,25 @@ public class ImageBaseOp {
                         e.printStackTrace();
                     }
                     int temp[]={outRGB,outRGB,outRGB};
-                    setRGB(outImg_time,x,y,srcImg_time.getRGB(x,y),temp);
+                    setRGB(outImg_time,x,y, temp, srcImg_time.getRGB(x,y));
                 }
             }
         }
     }
 
+    /**
+     * 二维核的使用过程
+     * @param x 核中心对应的图像X坐标
+     * @param y 核中心对应的图像Y坐标
+     * @param border 核半径
+     * @param Convolution 核本体
+     * @param srcImage 原图像
+     * @param xStart 原图像起始x坐标
+     * @param width 原图像宽度（比x坐标的最大值大1）
+     * @param yStart 原图像起始y坐标
+     * @param height 原图像高度（比y坐标的最大值大1）
+     * @return
+     */
     private static int doKenel(int x,int y,int border, int[][] Convolution,BufferedImage srcImage,int xStart,int width,int yStart,int height) {
         int srcRGB[] = new int[3];
         int outRGB=0;
@@ -162,7 +182,7 @@ public class ImageBaseOp {
                     y1=height-1;
                 }
 
-                srcRGB = getRGBInArrary(srcImage, x1, y1);
+                srcRGB = getRgbArrary(srcImage, x1, y1);
                 //-----------------------------------
                 outRGB+= (Convolution[center + i][center + j] * srcRGB[0]);
                 //------------------------------------
@@ -175,7 +195,7 @@ public class ImageBaseOp {
         for(int x=0;x<srcImage.getWidth();x++){
             for(int y=0;y<srcImage.getHeight();y++){
                 int temp[]={RGBArrary[x][y],RGBArrary[x][y],RGBArrary[x][y]};
-                ImageBaseOp.setRGB(srcImage,x,y,srcImage.getRGB(x,y),temp);
+                ImageBaseOp.setRGB(srcImage,x,y, temp, srcImage.getRGB(x,y));
             }
         }
     }
@@ -193,24 +213,29 @@ public class ImageBaseOp {
         }
     }
 
-    public static void QueZhiChuLi(BufferedImage srcImage,int percent){
-        int xStart=srcImage.getMinX();
-        int yStart=srcImage.getMinY();
-        int width = srcImage.getWidth();
-        int height = srcImage.getHeight();
+    /**
+     * 保留大于（原图像最大灰度的percentNUM %）的像素
+     * @param image 原图像
+     * @param percentNUM
+     */
+    public static void thresholdProcessing(BufferedImage image, int percentNUM){
+        int xStart=image.getMinX();
+        int yStart=image.getMinY();
+        int width = image.getWidth();
+        int height = image.getHeight();
         int max=0;
         for(int x = xStart; x < width ; x ++) {
             for(int y = yStart; y < height; y++) {
-                if(getRGBInArrary(srcImage,x,y)[0]>max){
-                    max=getRGBInArrary(srcImage,x,y)[0];
+                if(getRgbArrary(image,x,y)[0]>max){
+                    max= getRgbArrary(image,x,y)[0];
                 }
             }
         }
-        int target=max*percent/100;
+        int target=max*percentNUM/100;
         for(int x = xStart; x < width ; x ++) {
             for(int y = yStart; y < height; y++) {
-                if(getRGBInArrary(srcImage,x,y)[0]<target){
-                    srcImage.setRGB(x,y,0);
+                if(getRgbArrary(image,x,y)[0]<=target){
+                    image.setRGB(x,y,0);
                 }
             }
         }

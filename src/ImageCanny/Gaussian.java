@@ -15,20 +15,21 @@ public class Gaussian {
     private int gaussianKenel[][];
     private int modulusOfNormalization =0;
 
-    BufferedImage srcImage,outImage;
-    String  imageSaveDir;
+    private BufferedImage srcImage,outImage;
+    private String  imageSaveDir;
 
-    public int getModulusOfNormalization(){
-        switch (normalizationMode){
-            case 0:
-                return modulusOfNormalization;
-            default:
-                return 1;
-        }
-    }
-    public Gaussian(double sigam, int guiYimode, int dimension,BufferedImage srcImage,BufferedImage outImage,String imageSaveDir){
+    /**
+     * 高斯模糊的构造函数
+     * @param sigam  高斯公式里的sigam
+     * @param normalizationMode 归一化的方式（0：整形  else：小数型）
+     * @param dimension 产生的高斯核的维数，1：使用一维核 2：使用二维核
+     * @param srcImage 原始图像
+     * @param outImage 结果图像
+     * @param imageSaveDir 结果图像的保存目录
+     */
+    public Gaussian(double sigam, int normalizationMode, int dimension,BufferedImage srcImage,BufferedImage outImage,String imageSaveDir){
         this.sigam=sigam;
-        this.normalizationMode =guiYimode;
+        this.normalizationMode =normalizationMode;
         this.srcImage=srcImage;
         this.outImage=outImage;
         this.imageSaveDir=imageSaveDir;
@@ -41,7 +42,23 @@ public class Gaussian {
         }
     }
 
-    //获取最佳的滤波器大小
+    /**
+     * 返回高斯核对应的归一化系数
+     * @return
+     */
+    public int getModulusOfNormalization(){
+        switch (normalizationMode){
+            case 0:
+                return modulusOfNormalization;
+            default:
+                return 1;
+        }
+    }
+
+
+    /**
+     *  获取最佳的高斯核大小 大于6*sigam的最小奇整数
+     */
     private int getSizeOfKenel(){
         int temp= (int) (6*sigam);
         if(temp<=1){
@@ -54,7 +71,9 @@ public class Gaussian {
         }
     }
 
-    //滤波器生成
+    /**
+     *高斯核生成
+     */
     private void generateGaussianTemplate(){
         double temp[][]=new double[gaussianKenel.length][gaussianKenel[0].length];
         double sigamaSquare2=2*sigam*sigam;
@@ -76,6 +95,10 @@ public class Gaussian {
         }
     }
 
+    /**
+     * 将产生的高斯核根据normalizationMode进行归一化
+     * @param temp
+     */
     private void Normalization(double[][] temp) {
         double t1;
         switch (normalizationMode){
@@ -100,7 +123,7 @@ public class Gaussian {
     }
 
     /**
-     *
+     *获得高斯图片
      */
     public void gaussianPicture(){
         generateGaussianTemplate();
