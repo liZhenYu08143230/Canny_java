@@ -23,39 +23,45 @@ public class Canny {
         int width = srcImage.getWidth();
         int height = srcImage.getHeight();
         double theta[][];
-        BufferedImage grayImage=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage gsImage1D=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage gradBYsoble=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage NMSImage=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
+//        BufferedImage grayImage=new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage grayImage=new BufferedImage(width,height,srcImage.getType());
+        BufferedImage gsImage1D=new BufferedImage(width,height,grayImage.getType());
+        BufferedImage gradBYsoble=new BufferedImage(width,height,gsImage1D.getType());
+        BufferedImage NMSImage=new BufferedImage(width,height,gradBYsoble.getType());
 
-
+        long startTime,endTime;
         //转化为灰度图
-        long startTimeGray=System.currentTimeMillis();
+        startTime=System.currentTimeMillis();
         Gray.toGray(srcImage,grayImage,imageSaveDir);
-        long endTimeGray=System.currentTimeMillis();
-        System.out.println("Running Time Gray="+(endTimeGray-startTimeGray)+"ms");
+        endTime=System.currentTimeMillis();
+        System.out.println("Running Time Gray="+(endTime-startTime)+"ms");
 
 
         Gaussian gaussian=new Gaussian(sigam,guiYiMode,dimension,grayImage,gsImage1D,imageSaveDir );
 
         //高斯模糊 1D
-        long startTime1D=System.currentTimeMillis();
+        startTime=System.currentTimeMillis();
         gaussian.gaussianPicture();
-        ImageBaseOp.thresholdProcessing(gsImage1D,15);
-        long endTime1D=System.currentTimeMillis();
-        System.out.println("Running Time Gaussian 1d="+(endTime1D-startTime1D)+"ms");
+        endTime=System.currentTimeMillis();
+        System.out.println("Running Time Gaussian 1d="+(endTime-startTime)+"ms");
 
         //梯度图像
-        long startTimeGrad=System.currentTimeMillis();
+        startTime=System.currentTimeMillis();
         theta=Grad.gradPictureSobel(gsImage1D,gradBYsoble,imageSaveDir);
-        long endTimeGrad=System.currentTimeMillis();
-        System.out.println("Running Time Grad="+(endTimeGrad-startTimeGrad)+"ms");
+        endTime=System.currentTimeMillis();
+        System.out.println("Running Time Grad="+(endTime-startTime)+"ms");
 
         //非最大抑制
-        long startTimeNMS=System.currentTimeMillis();
-        NMSImage= NMS.NMSwithPowerWeight(gradBYsoble,theta,Grad.getGxGy(),imageSaveDir);
-        long endTimeNMS=System.currentTimeMillis();
-        System.out.println("Running Time NMS="+(endTimeNMS-startTimeNMS)+"ms");
+        startTime=System.currentTimeMillis();
+        NMS.NMSwithPowerWeight(Grad.getGxGy(),gradBYsoble,NMSImage,theta,imageSaveDir);
+        endTime=System.currentTimeMillis();
+        System.out.println("Running Time NMS="+(endTime-startTime)+"ms");
+
+        //双阙值处理
+        startTime=System.currentTimeMillis();
+        Threshold.doubleThreshold(NMSImage,gradBYsoble,imageSaveDir);
+        endTime=System.currentTimeMillis();
+        System.out.println("Running Time Threshold="+(endTime-startTime)+"ms");
 
     }
     private BufferedImage getImage(String srcImagePath){

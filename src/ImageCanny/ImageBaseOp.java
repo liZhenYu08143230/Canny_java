@@ -31,9 +31,8 @@ public class ImageBaseOp {
      * @param x 图片修改位置的x坐标
      * @param y 图片修改位置的y上坐标
      * @param  rgb 修改的rgb数组
-     * @param  srcPixel 原像素值
      */
-    public static void setRGB(BufferedImage Image, int x, int y, int[] rgb, int srcPixel){
+    public static void setRGB(BufferedImage Image, int x, int y, int[] rgb){
         int pixel;
         for(int i=0;i<3;i++){
             if(rgb[i]>255){
@@ -42,7 +41,7 @@ public class ImageBaseOp {
                 rgb[i]=abs(rgb[i]);
             }
         }
-        pixel = (rgb[0] << 16) & 0x00ff0000 | (srcPixel & 0xff00ffff);
+        pixel = (rgb[0] << 16) & 0x00ff0000 | (0xff00ffff);
         pixel = (rgb[1]  << 8) & 0x0000ff00 | (pixel & 0xffff00ff);
         pixel = (rgb[2] ) & 0x000000ff | (pixel & 0xffffff00);
         Image.setRGB(x, y, pixel);
@@ -123,16 +122,16 @@ public class ImageBaseOp {
 
                     for(int i=-border;i<=border;i++){
                         int xy1=secondXY+i;
-                        int srcRGB[];
+                        int srcRGB;
 
                         if (xy1<secondStart){
                             xy1=secondStart;
                         }else if(xy1>=secondEnd){
                             xy1=secondEnd-1;
                         }
-                        srcRGB = getRgbArrary(srcImg_time,time==0?x:xy1,time==1?y:xy1);
+                        srcRGB = getRgbArrary(srcImg_time,time==0?x:xy1,time==1?y:xy1)[0];
                         //-----------------------------------
-                        outRGB+=(Convolution[center+i]*srcRGB[0]);
+                        outRGB+=(Convolution[center+i]*srcRGB);
                         //------------------------------------
                     }
                     /*-----------------*/
@@ -143,7 +142,7 @@ public class ImageBaseOp {
                         e.printStackTrace();
                     }
                     int temp[]={outRGB,outRGB,outRGB};
-                    setRGB(outImg_time,x,y, temp, srcImg_time.getRGB(x,y));
+                    setRGB(outImg_time,x,y, temp);
                 }
             }
         }
@@ -163,11 +162,10 @@ public class ImageBaseOp {
      * @return
      */
     private static int doKenel(int x,int y,int border, int[][] Convolution,BufferedImage srcImage,int xStart,int width,int yStart,int height) {
-        int srcRGB[] = new int[3];
+        int srcRGB;
         int outRGB=0;
         int center = border;
         for (int i = -border; i <= border; i++) {
-            srcRGB[0] = srcRGB[1] = srcRGB[2] = 0;
             int x1 = x + i;
             if(x1<xStart){
                 x1=xStart;
@@ -182,9 +180,9 @@ public class ImageBaseOp {
                     y1=height-1;
                 }
 
-                srcRGB = getRgbArrary(srcImage, x1, y1);
+                srcRGB = getRgbArrary(srcImage, x1, y1)[0];
                 //-----------------------------------
-                outRGB+= (Convolution[center + i][center + j] * srcRGB[0]);
+                outRGB+= (Convolution[center + i][center + j] * srcRGB);
                 //------------------------------------
             }
         }
@@ -195,7 +193,7 @@ public class ImageBaseOp {
         for(int x=0;x<srcImage.getWidth();x++){
             for(int y=0;y<srcImage.getHeight();y++){
                 int temp[]={RGBArrary[x][y],RGBArrary[x][y],RGBArrary[x][y]};
-                ImageBaseOp.setRGB(srcImage,x,y, temp, srcImage.getRGB(x,y));
+                ImageBaseOp.setRGB(srcImage,x,y, temp);
             }
         }
     }
@@ -210,34 +208,6 @@ public class ImageBaseOp {
             ImageIO.write(srcImage, formatName, file);
         }catch (Exception e){
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * 保留大于（原图像最大灰度的percentNUM %）的像素
-     * @param image 原图像
-     * @param percentNUM
-     */
-    public static void thresholdProcessing(BufferedImage image, int percentNUM){
-        int xStart=image.getMinX();
-        int yStart=image.getMinY();
-        int width = image.getWidth();
-        int height = image.getHeight();
-        int max=0;
-        for(int x = xStart; x < width ; x ++) {
-            for(int y = yStart; y < height; y++) {
-                if(getRgbArrary(image,x,y)[0]>max){
-                    max= getRgbArrary(image,x,y)[0];
-                }
-            }
-        }
-        int target=max*percentNUM/100;
-        for(int x = xStart; x < width ; x ++) {
-            for(int y = yStart; y < height; y++) {
-                if(getRgbArrary(image,x,y)[0]<=target){
-                    image.setRGB(x,y,0);
-                }
-            }
         }
     }
 }

@@ -86,22 +86,19 @@ public class NMS {
         return NmsImage;
     }
 
-    public static BufferedImage NMSwithPowerWeight(BufferedImage gradImage,double[][] theta,int gxGY[][][],String imageSaveDir){
-        int xStart=gradImage.getMinX();
-        int yStart=gradImage.getMinY();
-        int width =gradImage.getWidth();
-        int height=gradImage.getHeight();
-        int [][]gx=gxGY[0];
-        int [][]gy=gxGY[1];
-        BufferedImage NmsImage=new BufferedImage(width,height,gradImage.getType());
-        int rgb1,rgb2,rgb3,rgb4;
-        double weight,rgbtemp1,rgbtemp2;
+    public static BufferedImage NMSwithPowerWeight(int[][] gradArrary,BufferedImage gradImage,BufferedImage NmsImage,double[][] theta,String imageSaveDir){
+        int xStart=NmsImage.getMinX();
+        int yStart=NmsImage.getMinY();
+        int width =NmsImage.getWidth();
+        int height=NmsImage.getHeight();
+        int grad1,grad2,grad3,grad4,gradXY;
+        double weight,gradtemp1,gradtemp2;
         double thetaXY;
         for(int x=xStart;x<width;x++){
             for(int y=yStart;y<height;y++){
                 thetaXY=theta[x][y];
-                rgb1=rgb2=rgb3=rgb4=0;
-                weight=rgbtemp1=rgbtemp2=0.0;
+                gradXY=gradArrary[x][y];
+                weight=0.0;
                 int xSub1,xAdd1,ySub1,yAdd1;
                 xSub1=(x-1)<xStart?xStart:(x-1);
                 xAdd1=(x+1)>=width?(width-1):(x+1);
@@ -190,14 +187,19 @@ public class NMS {
 
                     weight=Math.tan(thetaXY);
                 }
-                rgb1=gradImage.getRGB(x1,y1);
-                rgb2=gradImage.getRGB(x2,y2);
-                rgb3=gradImage.getRGB(x3,y3);
-                rgb4=gradImage.getRGB(x4,y4);
+                grad1=gradArrary[x1][y1];
+                grad2=gradArrary[x2][y2];
+                grad3=gradArrary[x3][y3];
+                grad4=gradArrary[x4][y4];
 
-                rgbtemp1=rgb1*weight+rgb2*(1-weight);
-                rgbtemp2=rgb3*weight+rgb4*(1-weight);
-                if(gradImage.getRGB(x,y)>rgbtemp1&&gradImage.getRGB(x,y)>rgbtemp2){
+                gradtemp1=grad1*weight+grad2*(1-weight);
+                gradtemp2=grad3*weight+grad4*(1-weight);
+                if(gradXY>=gradtemp1&&gradXY>=gradtemp2){
+                    /*if(gradImage.getRGB(x,y)!=0){
+                        NmsImage.setRGB(x,y,0xffffffff);
+                    }else{
+                        NmsImage.setRGB(x,y,0);
+                    }*/
                     NmsImage.setRGB(x,y,gradImage.getRGB(x,y));
                 }else {
                     NmsImage.setRGB(x,y,0);

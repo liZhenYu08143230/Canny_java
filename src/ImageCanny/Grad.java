@@ -12,6 +12,7 @@ public class Grad {
     private static double theta[][];
     private static int gx[][];
     private static int gy[][];
+    private static int gxGy[][];
 
     /**
      * 使用Sobel算子产生梯度图像所需的Gx，Gy图像
@@ -32,6 +33,7 @@ public class Grad {
 
         gx=new int [width][height];
         gy=new int [width][height];
+        gxGy=new int [width][height];
         theta=new double[width][height];
 
         ImageBaseOp.Convolution(srcImage,gx,sobelX,modulusOfNormalization);
@@ -40,7 +42,7 @@ public class Grad {
         ImageBaseOp.changePicture(sobel[0],gx);
         ImageBaseOp.changePicture(sobel[1],gy);
 
-        gradPicture(gx,gy,outImage);
+        gradPicture(outImage);
 
         angleArrary(gx,gy);
 
@@ -56,22 +58,21 @@ public class Grad {
 
     /**
      * 利用Gx和Gy计算图像的梯度
-     * @param gx 保存的Gx(x方向的一阶偏微分)
-     * @param gx 保存的Gy(y方向的一阶偏微分)
      * @param outImage 结果图像
      */
-    private static void gradPicture(int[][] gx,int[][] gy, BufferedImage outImage) {
+    private static void gradPicture( BufferedImage outImage) {
         int width=gx.length;
         int height=gx[0].length;
         int rgb[]=new int[3];
         for(int x=0;x<width;x++){
             for(int y=0;y<height;y++){
 //                M(x,y)=sqrt(Gx^2+Gy^2)
-  //              rgb[0]=(int) sqrt(pow(gx[x][y],2)+pow(gy[x][y],2));
+                rgb[0]=(int) sqrt(pow(gx[x][y],2)+pow(gy[x][y],2));
 //                M(x,y)=|Gx|+|Gy|
-                rgb[0]=abs(gx[x][y])+abs(gy[x][y]);
+//                rgb[0]=abs(gx[x][y])+abs(gy[x][y]);
+                gxGy[x][y]=rgb[0];
                 rgb[1]=rgb[2]=rgb[0];
-                ImageBaseOp.setRGB(outImage,x,y, rgb, 0xffffffff);
+                ImageBaseOp.setRGB(outImage,x,y, rgb);
             }
         }
     }
@@ -94,8 +95,7 @@ public class Grad {
         }
     }
 
-    public static int[][][] getGxGy(){
-        int [][][] result={gx,gy};
-        return  result;
+    public static int[][] getGxGy(){
+        return  gxGy;
     }
 }
